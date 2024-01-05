@@ -56,6 +56,7 @@ class TwoPicturesScreen extends StatelessWidget {
     tempCubeSides.add(cubeSides[3]);
     tempCubeSides.add(cubeSides[4]);
     String cubeSidesString = tempCubeSides.join();
+    print(cubeSidesString);
 
     final cube0 = cuber.Cube.from(cubeSidesString);
     final cubeSolve = cube0.solve();

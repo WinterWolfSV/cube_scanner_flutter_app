@@ -1,3 +1,4 @@
+import 'package:cube_scanner/screens/cube_confirmation_screen.dart';
 import 'package:cube_scanner/screens/cube_image_viewer_screen.dart';
 import 'package:cube_scanner/screens/cube_scan_screen.dart';
 import 'package:cube_scanner/screens/home_screen.dart';
@@ -27,6 +28,9 @@ final GoRouter router = GoRouter(
                         imagePathList: state.pathParameters['id1']!.split(','),
                       )),
             ]),
+        GoRoute(path: 'cube_confirmation', builder: (BuildContext context, GoRouterState state) {
+          return CubeConfirmationScreen();
+        }),
       ],
     ),
   ],

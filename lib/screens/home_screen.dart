@@ -44,8 +44,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             children: [
 
               ElevatedButton(
-                onPressed: () => context.go('/testing'),
-                child: const Text('Multiple choice'),
+                onPressed: () => context.go('/cube_confirmation'),
+                child: const Text('Cube verification'),
               ),
             ],
           )),
