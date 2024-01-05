@@ -1,23 +1,35 @@
-import 'dart:ffi';
 import 'dart:math';
 
+import 'package:cuber/cuber.dart' as cuber;
 import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:image/image.dart' as img;
 
 enum ColorName { white, yellow, green, blue, red, orange }
+late List<String> cubeSides;
+const Color constWhite = Color(0xffffffff);
+const Color constYellow = Color(0xffffff00);
+const Color constGreen = Color(0xff00ff00);
+const Color constOrange = Color(0xffffa500);
+const Color constBlue = Color(0xff0000ff);
+const Color constRed = Color(0xffff0000);
+
+
 
 class TwoPicturesScreen extends StatelessWidget {
   final List<String> imagePathList;
 
   TwoPicturesScreen({Key? key, required this.imagePathList}) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     final colorPalette = getColorPalette(imagePathList);
+    cubeSides = List.empty(growable: true);
 
-    return Scaffold(
+
+    Scaffold returnScaffold = Scaffold(
       appBar: AppBar(
         title: const Text('Cube view screen'),
       ),
@@ -26,12 +38,32 @@ class TwoPicturesScreen extends StatelessWidget {
           for (final imagePath in imagePathList)
             Expanded(
               child: convertImageToImage(
-                imageRefiner(getImageFromPath(imagePath), colorPalette),
+                imageRefiner(getImageFromPath(imagePath), colorPalette).$1,
               ),
             ),
         ],
       ),
     );
+
+    // Current order of cube sides: U, D, F, L, B, R
+    // Desired order of cube sides: U, R, F, D, L, B
+
+    List<String> tempCubeSides = List.empty(growable: true);
+    tempCubeSides.add(cubeSides[0]);
+    tempCubeSides.add(cubeSides[5]);
+    tempCubeSides.add(cubeSides[2]);
+    tempCubeSides.add(cubeSides[1]);
+    tempCubeSides.add(cubeSides[3]);
+    tempCubeSides.add(cubeSides[4]);
+    String cubeSidesString = tempCubeSides.join();
+    print(cubeSidesString);
+
+    final cube0 = cuber.Cube.from(cubeSidesString);
+    final cubeSolve = cube0.solve();
+    print(cube0.isOk);
+    print(cubeSolve);
+
+    return returnScaffold;
   }
 
   Image convertImageToImage(img.Image image) {
@@ -56,27 +88,41 @@ class TwoPicturesScreen extends StatelessWidget {
     return img.copyResizeCropSquare(image, size: 300);
   }
 
-  img.Image imageRefiner(img.Image image, List<Color> colorPalette) {
+  (img.Image, String) imageRefiner(img.Image image, List<Color> colorPalette) {
     image = imageSquarer(image);
 
-    final pixelColorList = [
-      convertRgbToColor(image.getPixel(50, 50)),
-      convertRgbToColor(image.getPixel(150, 50)),
-      convertRgbToColor(image.getPixel(250, 50)),
-      convertRgbToColor(image.getPixel(50, 150)),
-      convertRgbToColor(image.getPixel(150, 150)),
-      convertRgbToColor(image.getPixel(250, 150)),
-      convertRgbToColor(image.getPixel(50, 250)),
-      convertRgbToColor(image.getPixel(150, 250)),
-      convertRgbToColor(image.getPixel(250, 250)),
-    ];
+    final pixelColorList = List.generate(
+      9,
+      (index) => convertRgbToColor(
+          image.getPixel(50 + (index % 3) * 100, 50 + (index ~/ 3) * 100)),
+    );
+    // final pixelColorList = [
+    //   convertRgbToColor(image.getPixel(50, 50)),
+    //   convertRgbToColor(image.getPixel(150, 50)),
+    //   convertRgbToColor(image.getPixel(250, 50)),
+    //   convertRgbToColor(image.getPixel(50, 150)),
+    //   convertRgbToColor(image.getPixel(150, 150)),
+    //   convertRgbToColor(image.getPixel(250, 150)),
+    //   convertRgbToColor(image.getPixel(50, 250)),
+    //   convertRgbToColor(image.getPixel(150, 250)),
+    //   convertRgbToColor(image.getPixel(250, 250)),
+    // ];
 
     final clearColorList = List.generate(
       9,
-          (index) => mapToClosestColor(pixelColorList[index], colorPalette),
+      (index) => mapToClosestColor(pixelColorList[index], colorPalette),
     );
 
-    return generateColorZones(clearColorList);
+    String sideView = clearColorList.map((e) => fromColorToColorSide(e)).join();
+    print(sideView);
+    cubeSides.add(sideView);
+    print(cubeSides.length);
+    if(cubeSides.length == 1) {
+      cubeSides[0] = cubeSides[0].replaceRange(4, 5, 'U');
+      clearColorList[4] = constWhite;
+    }
+
+    return (generateColorZones(clearColorList), "#");
   }
 
   double distanceBetweenTwoColors(Color color1, Color color2) {
@@ -97,7 +143,7 @@ class TwoPicturesScreen extends StatelessWidget {
       // For the first color, white, take the color that is closest to white in a 20x20 pixel area in the center of the image
       if (imagePaths.indexOf(imagePath) == 0) {
         double minDistance = double.infinity;
-        final targetColor = const Color(0xffffffff);
+        const targetColor = constWhite;
 
         for (int row = 140; row < 160; row++) {
           for (int col = 140; col < 160; col++) {
@@ -117,24 +163,45 @@ class TwoPicturesScreen extends StatelessWidget {
     return colorPalette;
   }
 
+  String fromColorToColorSide(Color color) {
+    switch (color) {
+      case constWhite:
+        return 'U';
+      case constYellow:
+        return 'D';
+      case constGreen:
+        return 'F';
+      case constOrange:
+        return 'L';
+      case constBlue:
+        return 'B';
+      case constRed:
+        return 'R';
+      default:
+        return 'No such color exists';
+    }
+  }
+
   Color mapToClosestColor(Color inputColor, List<Color> colorPalette) {
-    final colorList = const <Color>[
-      Color(0x00ffffff), // White
-      Color(0x00ffff00), // Yellow
-      Color(0x0000ff00), // Green
-      Color(0x000000ff), // Blue
-      Color(0x00ff0000), // Red
-      Color(0x00ffa500), // Orange
+    const colorList = <Color>[
+      constWhite,
+      constYellow,
+      constGreen,
+      constOrange,
+      constBlue,
+      constRed,
     ];
 
     double minDistance = double.infinity;
-    Color closestColor = const Color(0x00ffffff); // Default to white
+    Color closestColor = constWhite; // Default to white
 
-    for (final color in colorPalette) {
-      final distance = distanceBetweenTwoColors(inputColor, color);
+    // for (final color in colorPalette) {
+    for (int i = 0; i < colorPalette.length; i++) {
+      final distance = distanceBetweenTwoColors(inputColor, colorPalette[i]);
       if (distance < minDistance) {
         minDistance = distance;
-        closestColor = color;
+        closestColor = colorList[i];
+        // closestColor = colorPalette[i];
       }
     }
 

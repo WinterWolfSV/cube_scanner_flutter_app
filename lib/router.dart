@@ -1,12 +1,9 @@
-import 'package:camera/camera.dart';
 import 'package:cube_scanner/screens/cube_image_viewer_screen.dart';
 import 'package:cube_scanner/screens/cube_scan_screen.dart';
 import 'package:cube_scanner/screens/home_screen.dart';
-import 'package:cube_scanner/screens/testing_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
-import 'main.dart';
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[

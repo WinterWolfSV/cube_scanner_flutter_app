@@ -154,7 +154,7 @@ Widget squareHalfTransparentBox(BuildContext context) {
 Map<String, Color> colorEnum(int color) {
   switch (color) {
     case 0:
-      return {'White': const Color(0xc0ffffff)};
+      return {'White': const Color(0xc0e0e0e0)};
     case 1:
       return {'Yellow': const Color(0xc0ffff00)};
     case 2:
@@ -184,8 +184,10 @@ Widget cubeSideInfo(int sideName) {
 }
 
 Widget aboveAndUnderSideInfo(int side) {
-  final topSide = side > 1 ? 0 : 2;
-  final bottomSide = side > 1 ? 1 : 4;
+  // Ranges top: 0 => 4, 1 => 2, 2-5 => 0
+  // Ranges bottom: 0 => 2, 1 => 4, 2-5 => 1
+  final topSide = side == 0 ? 4 : side == 1 ? 2 : 0;
+  final bottomSide = side == 0 ? 2 : side == 1 ? 4 : 1;
   return Column(
     children: [
       Expanded(
