@@ -56,11 +56,9 @@ class TwoPicturesScreen extends StatelessWidget {
     tempCubeSides.add(cubeSides[3]);
     tempCubeSides.add(cubeSides[4]);
     String cubeSidesString = tempCubeSides.join();
-    print(cubeSidesString);
 
     final cube0 = cuber.Cube.from(cubeSidesString);
     final cubeSolve = cube0.solve();
-    print(cube0.isOk);
     print(cubeSolve);
 
     return returnScaffold;
@@ -81,6 +79,7 @@ class TwoPicturesScreen extends StatelessWidget {
 
   img.Image getImageFromPath(String imagePath) {
     final imageFile = File(imagePath);
+    print(imagePath);
     return img.decodeImage(imageFile.readAsBytesSync())!;
   }
 
@@ -96,17 +95,6 @@ class TwoPicturesScreen extends StatelessWidget {
       (index) => convertRgbToColor(
           image.getPixel(50 + (index % 3) * 100, 50 + (index ~/ 3) * 100)),
     );
-    // final pixelColorList = [
-    //   convertRgbToColor(image.getPixel(50, 50)),
-    //   convertRgbToColor(image.getPixel(150, 50)),
-    //   convertRgbToColor(image.getPixel(250, 50)),
-    //   convertRgbToColor(image.getPixel(50, 150)),
-    //   convertRgbToColor(image.getPixel(150, 150)),
-    //   convertRgbToColor(image.getPixel(250, 150)),
-    //   convertRgbToColor(image.getPixel(50, 250)),
-    //   convertRgbToColor(image.getPixel(150, 250)),
-    //   convertRgbToColor(image.getPixel(250, 250)),
-    // ];
 
     final clearColorList = List.generate(
       9,
@@ -114,9 +102,7 @@ class TwoPicturesScreen extends StatelessWidget {
     );
 
     String sideView = clearColorList.map((e) => fromColorToColorSide(e)).join();
-    print(sideView);
     cubeSides.add(sideView);
-    print(cubeSides.length);
     if(cubeSides.length == 1) {
       cubeSides[0] = cubeSides[0].replaceRange(4, 5, 'U');
       clearColorList[4] = constWhite;

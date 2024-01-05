@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +6,7 @@ import '../main.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
+
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -22,8 +21,10 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void initState() {
+
     super.initState();
     controller = CameraController(cameras[0], ResolutionPreset.high);
+    controller.setFlashMode(FlashMode.off);
     controller.initialize().then((_) {
       if (mounted) {
         setState(() {});
@@ -79,19 +80,23 @@ class _CameraScreenState extends State<CameraScreen> {
           if (index == 0) {
             context.go('/');
           } else if (index == 1) {
-            print("Image to take: $imageToTake");
+            print("Length is :::${imagePaths.length}");
             if (imageToTake < amountOfImages - 1) {
-              takePicture(context, controller).then((value) => setState(() {
+               takePicture(context, controller).then((value) => setState(() {
+                print("Value is: $value");
                 imagePaths[imageToTake] = value;
+                print("Image paths are: $imagePaths");
                 imageToTake++;
               }));
             } else if (imageToTake >= amountOfImages - 1) {
               takePicture(context, controller).then((value) => setState(() {
+                print("Final value is: $value");
                 imagePaths[imageToTake] = value;
+                print("Image paths are: $imagePaths");
+                imageToTake = 0;
                 context.goNamed('/camera_view',
                     pathParameters: {'id1': imagePaths.join(',')});
-                imageToTake = 0;
-                imagePaths = [];
+
               }));
             }
           }
@@ -125,12 +130,13 @@ Widget cameraWidget(BuildContext context, CameraController controller) {
 Future<String> takePicture(BuildContext context, CameraController controller) async {
   try {
     while (controller.value.isTakingPicture) {
-      print("Taking picture...");
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    await controller.setFlashMode(FlashMode.off);
     await controller.setFocusMode(FocusMode.locked);
+    await controller.setExposureMode(ExposureMode.locked);
     final image = await controller.takePicture();
+    await controller.setFocusMode(FocusMode.auto);
+    await controller.setExposureMode(ExposureMode.auto);
 
     return image.path;
   } catch (e) {
@@ -142,7 +148,6 @@ Future<String> takePicture(BuildContext context, CameraController controller) as
 Widget squareHalfTransparentBox(BuildContext context) {
   final screenHeight = MediaQuery.of(context).size.height;
   final screenWidth = MediaQuery.of(context).size.width;
-  print("screenHeight: $screenHeight");
   return Container(
     height: (screenHeight - screenWidth) / 2,
     decoration: const BoxDecoration(
