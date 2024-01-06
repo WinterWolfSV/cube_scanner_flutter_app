@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cube_scanner/screens/cube_processor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cuber/cuber.dart' as cuber;
@@ -7,13 +8,13 @@ import 'package:cuber/cuber.dart' as cuber;
 String colorToChange = 'U';
 
 class CubeConfirmationScreen extends StatelessWidget {
-  final String cubeSidesString;
-  CubeConfirmationScreen({Key? key, required this.cubeSidesString})
+  final List<String> cubeSidesImagePaths;
+  CubeConfirmationScreen({Key? key, required this.cubeSidesImagePaths})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    String cubeFormat = cubeSidesString;
+    late String cubeFormat = CubeProcessor.process(cubeSidesImagePaths);
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(

@@ -5,7 +5,6 @@ import 'package:cube_scanner/screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
-
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
@@ -21,20 +20,14 @@ final GoRouter router = GoRouter(
             },
             routes: <RouteBase>[
               GoRoute(
-                  path: 'camera_view/:id1',
-                  name: '/camera_view',
+                  path: 'cube_confirmation/:id1',
+                  name: '/cube_confirmation',
                   builder: (BuildContext context, GoRouterState state) =>
-                      TwoPicturesScreen(
-                        imagePathList: state.pathParameters['id1']!.split(','),
+                      CubeConfirmationScreen(
+                        cubeSidesImagePaths:
+                            state.pathParameters['id1']!.split(','),
                       )),
             ]),
-        GoRoute(
-            path: 'cube_confirmation/:id1',
-            name: '/cube_confirmation',
-            builder: (BuildContext context, GoRouterState state) =>
-                CubeConfirmationScreen(
-                  cubeSidesString: state.pathParameters['id1']!,
-                )),
       ],
     ),
   ],

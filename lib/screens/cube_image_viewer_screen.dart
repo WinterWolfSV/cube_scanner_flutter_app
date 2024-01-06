@@ -43,7 +43,8 @@ class TwoPicturesScreen extends StatelessWidget {
                 imageRefiner(getImageFromPath(imagePath), colorPalette).$1,
               ),
             ),
-          ElevatedButton(onPressed: () => context.goNamed('/cube_confirmation', pathParameters: {'id1': cubeSidesString}), child: null,),
+          // ElevatedButton(onPressed: () => context.goNamed('/cube_confirmation', pathParameters: {'id1': cubeSidesString}), child: null,),
+          ElevatedButton(onPressed: () => context.goNamed('/cube_confirmation', pathParameters: {'id1': imagePathList.join(',')}), child: null,),
         ],
       ),
     );

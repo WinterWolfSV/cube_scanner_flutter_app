@@ -7,7 +7,6 @@ import '../main.dart';
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
 
-
   @override
   State<CameraScreen> createState() => _CameraScreenState();
 }
@@ -21,11 +20,10 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void initState() {
-
     super.initState();
     controller = CameraController(cameras[0], ResolutionPreset.high);
-    controller.setFlashMode(FlashMode.off);
     controller.initialize().then((_) {
+      controller.setFlashMode(FlashMode.off);
       if (mounted) {
         setState(() {});
       }
@@ -58,6 +56,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
     return Scaffold(
       extendBody: true,
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
           cameraWidget(context, controller),
@@ -69,35 +68,32 @@ class _CameraScreenState extends State<CameraScreen> {
             alignment: Alignment.bottomCenter,
             child: squareHalfTransparentBox(context),
           ),
-          cubeSideInfo(imageToTake),
+          Align(
+            alignment: Alignment.topCenter,
+            child: cubeSideInfo(imageToTake),
+          ),
           aboveAndUnderSideInfo(imageToTake),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        elevation: 0,
-        backgroundColor: const Color(0x20000000),
+        backgroundColor: const Color(0x00000000),
+        // Set height of bottom navigation bar
         onTap: (int index) {
           if (index == 0) {
             context.go('/');
           } else if (index == 1) {
-            print("Length is :::${imagePaths.length}");
             if (imageToTake < amountOfImages - 1) {
-               takePicture(context, controller).then((value) => setState(() {
-                print("Value is: $value");
-                imagePaths[imageToTake] = value;
-                print("Image paths are: $imagePaths");
-                imageToTake++;
-              }));
+              takePicture(context, controller).then((value) => setState(() {
+                    imagePaths[imageToTake] = value;
+                    imageToTake++;
+                  }));
             } else if (imageToTake >= amountOfImages - 1) {
               takePicture(context, controller).then((value) => setState(() {
-                print("Final value is: $value");
-                imagePaths[imageToTake] = value;
-                print("Image paths are: $imagePaths");
-                imageToTake = 0;
-                context.goNamed('/camera_view',
-                    pathParameters: {'id1': imagePaths.join(',')});
-
-              }));
+                    imagePaths[imageToTake] = value;
+                    imageToTake = 0;
+                    context.goNamed('/cube_confirmation',
+                        pathParameters: {'id1': imagePaths.join(',')});
+                  }));
             }
           }
         },
@@ -119,15 +115,22 @@ class _CameraScreenState extends State<CameraScreen> {
 }
 
 Widget cameraWidget(BuildContext context, CameraController controller) {
+  // How do I add a rounded corner to the camera preview?
+  // Use a ClipRRect widget with a BorderRadius.
   return Transform.scale(
     scale: 1,
     child: Center(
-      child: CameraPreview(controller),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: CameraPreview(controller),
+        ),
+      // child: CameraPreview(controller),
     ),
   );
 }
 
-Future<String> takePicture(BuildContext context, CameraController controller) async {
+Future<String> takePicture(
+    BuildContext context, CameraController controller) async {
   try {
     while (controller.value.isTakingPicture) {
       await Future.delayed(const Duration(milliseconds: 100));
@@ -176,14 +179,12 @@ Map<String, Color> colorEnum(int color) {
 }
 
 Widget cubeSideInfo(int sideName) {
-  return Center(
-    heightFactor: 5,
-    child: Text(
-      "Side to take image of: ${colorEnum(sideName).keys.first.toString()}",
-      style: const TextStyle(
-        color: Colors.black,
-        fontSize: 25,
-      ),
+  return Text(
+    "\nSide to take image of: ${colorEnum(sideName).keys.first.toString()}",
+    textAlign: TextAlign.center,
+    style: const TextStyle(
+      color: Color(0xff674fa5),
+      fontSize: 25,
     ),
   );
 }
@@ -191,8 +192,17 @@ Widget cubeSideInfo(int sideName) {
 Widget aboveAndUnderSideInfo(int side) {
   // Ranges top: 0 => 4, 1 => 2, 2-5 => 0
   // Ranges bottom: 0 => 2, 1 => 4, 2-5 => 1
-  final topSide = side == 0 ? 4 : side == 1 ? 2 : 0;
-  final bottomSide = side == 0 ? 2 : side == 1 ? 4 : 1;
+  final topSide = side == 0
+      ? 4
+      : side == 1
+          ? 2
+          : 0;
+  final bottomSide = side == 0
+      ? 2
+      : side == 1
+          ? 4
+          : 1;
+
   return Column(
     children: [
       Expanded(
