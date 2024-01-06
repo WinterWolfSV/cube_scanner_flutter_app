@@ -28,9 +28,13 @@ final GoRouter router = GoRouter(
                         imagePathList: state.pathParameters['id1']!.split(','),
                       )),
             ]),
-        GoRoute(path: 'cube_confirmation', builder: (BuildContext context, GoRouterState state) {
-          return CubeConfirmationScreen();
-        }),
+        GoRoute(
+            path: 'cube_confirmation/:id1',
+            name: '/cube_confirmation',
+            builder: (BuildContext context, GoRouterState state) =>
+                CubeConfirmationScreen(
+                  cubeSidesString: state.pathParameters['id1']!,
+                )),
       ],
     ),
   ],

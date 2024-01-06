@@ -7,10 +7,13 @@ import 'package:cuber/cuber.dart' as cuber;
 String colorToChange = 'U';
 
 class CubeConfirmationScreen extends StatelessWidget {
+  final String cubeSidesString;
+  CubeConfirmationScreen({Key? key, required this.cubeSidesString})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    String cubeFormat =
-        "BRULUDFDUBFFBRLFBBDLRFFUBUDULRUDDULRLDLLLLLFLRFDDBBDBF";
+    String cubeFormat = cubeSidesString;
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -37,7 +40,6 @@ class RubiksCube extends StatefulWidget {
 class _RubiksCubeState extends State<RubiksCube> {
   @override
   Widget build(BuildContext context) {
-    print(widget.cubeFormat);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -81,7 +83,8 @@ class _RubiksCubeState extends State<RubiksCube> {
   String cubeSolution() {
     final cube0 = cuber.Cube.from(widget.cubeFormat);
     final cubeSolve = cube0.solve();
-    return cubeSolve.toString();
+    String returnString = cubeSolve != null ? cubeSolve.toString() : 'The cube is not solvable';
+    return returnString;
   }
 
   Widget buildCubeFace(int start, int end, bool reversed) {
@@ -204,7 +207,6 @@ class _colorSelectionBarState extends State<colorSelectionBar> {
                   setState(() {
                     colorToChange = key;
                   });
-                  print(key);
                 },
               ),
             ),

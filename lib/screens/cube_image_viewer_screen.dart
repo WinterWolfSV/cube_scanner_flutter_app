@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cuber/cuber.dart' as cuber;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:io';
 
 import 'package:image/image.dart' as img;
@@ -27,6 +28,7 @@ class TwoPicturesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorPalette = getColorPalette(imagePathList);
     cubeSides = List.empty(growable: true);
+    String cubeSidesString = "";
 
 
     Scaffold returnScaffold = Scaffold(
@@ -41,6 +43,7 @@ class TwoPicturesScreen extends StatelessWidget {
                 imageRefiner(getImageFromPath(imagePath), colorPalette).$1,
               ),
             ),
+          ElevatedButton(onPressed: () => context.goNamed('/cube_confirmation', pathParameters: {'id1': cubeSidesString}), child: null,),
         ],
       ),
     );
@@ -55,7 +58,7 @@ class TwoPicturesScreen extends StatelessWidget {
     tempCubeSides.add(cubeSides[1]);
     tempCubeSides.add(cubeSides[3]);
     tempCubeSides.add(cubeSides[4]);
-    String cubeSidesString = tempCubeSides.join();
+    cubeSidesString = tempCubeSides.join();
     print(cubeSidesString);
 
     final cube0 = cuber.Cube.from(cubeSidesString);
