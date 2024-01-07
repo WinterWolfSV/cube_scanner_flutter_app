@@ -1,7 +1,7 @@
 import 'package:cube_scanner/screens/cube_confirmation_screen.dart';
-import 'package:cube_scanner/screens/cube_image_viewer_screen.dart';
 import 'package:cube_scanner/screens/cube_scan_screen.dart';
 import 'package:cube_scanner/screens/home_screen.dart';
+import 'package:cube_scanner/screens/testing_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,6 +28,12 @@ final GoRouter router = GoRouter(
                             state.pathParameters['id1']!.split(','),
                       )),
             ]),
+        GoRoute(
+            path: 'testing',
+            builder: (BuildContext context, GoRouterState state) {
+              return BleDeviceScreen();
+            },
+                ),
       ],
     ),
   ],
