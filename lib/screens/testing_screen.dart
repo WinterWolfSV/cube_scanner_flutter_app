@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
+Guid targetService = Guid("0000FE07-0000-1000-8000-00805F9B34FC");
 
 class BleDeviceScreen extends StatefulWidget {
   @override
@@ -9,136 +11,107 @@ class BleDeviceScreen extends StatefulWidget {
 }
 
 class _BleDeviceScreenState extends State<BleDeviceScreen> {
-  final FlutterReactiveBle _ble = FlutterReactiveBle();
-  late StreamSubscription<DiscoveredDevice> _subscription;
-  DiscoveredDevice? _devices = null;
-  String uuid = "00001802-0000-1000-8000-00805F9B34FB";
-  String otherUuid = "00002A05-0000-1000-8000-00805F9B34FB";
+  String processUuid = "YOUR_PROCESS_UUID";
 
   @override
   void initState() {
     super.initState();
-    print("initState");
+    initializeBle();
   }
 
-  @override
-  void dispose() {
-    _subscription.cancel();
-    _ble.deinitialize();
-    super.dispose();
+  Future<void> initializeBle() async {
+    // Request location permissions if needed
+    // bleScan();
   }
 
   @override
   Widget build(BuildContext context) {
+    // TODO: implement build
     return Scaffold(
-      appBar: AppBar(
-        title: Text('BLE Devices'),
-      ),
-      body: ElevatedButton(
-        onPressed: _startScanning,
-        child: Text('Scan'),
-      ),
-    );
-  }
-
-  void _startScanning() {
-    _ble.scanForDevices(
-      withServices: [],
-      scanMode: ScanMode.lowLatency,
-    ).listen(
-          (device) async {
-        _handleScannedDevice(device);
-      },
-      onError: (dynamic error) {
-        print('Error: $error');
-        // Code for handling scan error
-      },
-    );
-  }
-
-  void disconnectDevice() async {
-
-  }
-
-  void _handleScannedDevice(DiscoveredDevice device) async {
-    if (device.serviceUuids.isNotEmpty &&
-        device.serviceUuids[0].toString() ==
-            "0000fe07-0000-1000-8000-00805f9b34fc") {
-      print("Device name: ${device.name}");
-      print("Device service names: ${device.serviceUuids[0]}");
-      _connectToDevice(device);
-    }
-    // Code for handling results
-  }
-
-  void _connectToDevice(DiscoveredDevice device) {
-    StreamSubscription<ConnectionStateUpdate> _connectedDeviceStream;
-
-    _connectedDeviceStream = _ble.connectToDevice(id: device.id).listen(
-          (connectionState) async {
-        print("Connection state: ${connectionState}");
-        if (connectionState.connectionState ==
-            DeviceConnectionState.connected) {
-          print("Connected to device");
-          await _writeToCharacteristic(device);
-        } else {
-          print("Not connected to device");
-        }
-      },
-      onError: (dynamic error) {
-        print('Error: $error');
-        // Code for handling connection error
-      },
-    );
-
-    print(_connectedDeviceStream.runtimeType);
-
-    // Wait for 5 seconds and cancel the connection stream
-    // Future.delayed(Duration(seconds: 5), () {
-    //   print("Cancelling stream");
-    //   _connectedDeviceStream.cancel();
-    // });
-  }
-
-  Future<void> _writeToCharacteristic(DiscoveredDevice device) async {
-    String data = "Hello World";
-    final characteristic = QualifiedCharacteristic(
-      serviceId: device.serviceUuids[0],
-      deviceId: device.id,
-      characteristicId: Uuid.parse("00002A05-0000-1000-8000-00805F9B34FB"),
-    );
-    await _ble.writeCharacteristicWithResponse(characteristic, value: data.codeUnits);
-  }
-
-}
-
-class BleDeviceDetailsScreen extends StatelessWidget {
-  final DiscoveredDevice device;
-
-  BleDeviceDetailsScreen(this.device);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Device Details'),
-      ),
+      appBar: AppBar(title: const Text('BLE Device Scan')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Device Name: ${device.name ?? 'Unknown'}'),
-            Text('Device ID: ${device.id}'),
+          children: <Widget>[
+            Text('BLE Device Scan'),
             ElevatedButton(
-              onPressed: () {
-                // Implement connection logic here
-                // You may want to use flutter_reactive_ble to connect to the device
-              },
-              child: Text('Connect'),
-            ),
+                onPressed: () => bleScan(), child: Text('Start Scan')),
+            ElevatedButton(
+                onPressed: () => disconnectAllBleDevices(),
+                child: Text("Disconnect All")),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> disconnectAllBleDevices() async {
+    await FlutterBluePlus.systemDevices
+        .then((value) => value.forEach((element) {
+              print("Disconnecting ${element.remoteId}");
+              element.disconnect();
+            }));
+  }
+
+  Future<void> bleScan() async {
+    BluetoothDevice? device;
+    FlutterBluePlus.setLogLevel(LogLevel.verbose, color: false);
+
+    var subscription = FlutterBluePlus.onScanResults.listen(
+      (results) {
+        if (results.isNotEmpty) {
+          print("boop!");
+          ScanResult r = results.last; // the most recently found device
+          device = r.device;
+          print(
+              '${r.device.remoteId}: "${r.advertisementData.advName}" found!');
+        }
+      },
+      onError: (e) => print(e),
+    );
+
+    await FlutterBluePlus.startScan(
+        withServices: [targetService], timeout: const Duration(seconds: 5));
+    FlutterBluePlus.cancelWhenScanComplete(subscription);
+    for (int i = 0; i < 10; i++) {
+      if (device != null) {
+        print("Found device ${device!.remoteId}");
+        await connectToBleDevice(device!);
+        break;
+      } else {
+        print("Waiting for device");
+        await Future.delayed(Duration(seconds: 1));
+      }
+    }
+  }
+
+  Future<void> connectToBleDevice(BluetoothDevice device) async {
+    print("Connecting to ${device.remoteId}");
+    await device.connect();
+    List<BluetoothService> services = await device.discoverServices();
+    print(services.length);
+    services.forEach((service) {
+      if (service.uuid == targetService) {
+        sendToService(service);
+      }
+    });
+    await Future.delayed(Duration(seconds: 1));
+    await disconnectBleDevice(device);
+  }
+
+  Future<void> disconnectBleDevice(BluetoothDevice device) async {
+    await device.disconnect();
+  }
+
+  Future<void> sendToService(BluetoothService service) async {
+    List<BluetoothCharacteristic> characteristics = service.characteristics;
+    characteristics.forEach((characteristic) {
+      if (characteristic.uuid.toString() ==
+          "2a05") {
+        print("Found characteristic");
+        print(characteristic.uuid);
+        characteristic.write("Hello World!".codeUnits);
+      }
+    });
   }
 }
