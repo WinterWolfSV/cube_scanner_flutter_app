@@ -1,9 +1,10 @@
-name: cube_scanner
-description: "A new Flutter project."
+name: "cube_scanner"
+description: "App a la Theodor Strube for his gymnasium project."
+
 
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.3
 
 environment:
   sdk: '>=3.2.2 <4.0.0'
@@ -19,6 +20,7 @@ dependencies:
   screenshot: ^2.1.0
   cuber: ^0.4.0
   flutter_reactive_ble: ^5.2.0
+  flutter_blue_plus: ^1.31.7
 
 dev_dependencies:
   flutter_test:

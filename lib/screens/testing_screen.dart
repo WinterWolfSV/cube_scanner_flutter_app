@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cube_scanner/screens/logic/bluetooth_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -35,83 +36,17 @@ class _BleDeviceScreenState extends State<BleDeviceScreen> {
           children: <Widget>[
             Text('BLE Device Scan'),
             ElevatedButton(
-                onPressed: () => bleScan(), child: Text('Start Scan')),
-            ElevatedButton(
-                onPressed: () => disconnectAllBleDevices(),
-                child: Text("Disconnect All")),
+                onPressed: () => sendToDevice("Hello world!"), child: Text('Send to device')),
           ],
         ),
       ),
     );
   }
-
-  Future<void> disconnectAllBleDevices() async {
-    await FlutterBluePlus.systemDevices
-        .then((value) => value.forEach((element) {
-              print("Disconnecting ${element.remoteId}");
-              element.disconnect();
-            }));
-  }
-
-  Future<void> bleScan() async {
-    BluetoothDevice? device;
-    FlutterBluePlus.setLogLevel(LogLevel.verbose, color: false);
-
-    var subscription = FlutterBluePlus.onScanResults.listen(
-      (results) {
-        if (results.isNotEmpty) {
-          print("boop!");
-          ScanResult r = results.last; // the most recently found device
-          device = r.device;
-          print(
-              '${r.device.remoteId}: "${r.advertisementData.advName}" found!');
-        }
-      },
-      onError: (e) => print(e),
-    );
-
-    await FlutterBluePlus.startScan(
-        withServices: [targetService], timeout: const Duration(seconds: 5));
-    FlutterBluePlus.cancelWhenScanComplete(subscription);
-    for (int i = 0; i < 10; i++) {
-      if (device != null) {
-        print("Found device ${device!.remoteId}");
-        await connectToBleDevice(device!);
-        break;
-      } else {
-        print("Waiting for device");
-        await Future.delayed(Duration(seconds: 1));
-      }
+  Future<void> sendToDevice(String message) async {
+    BluetoothHandler ble = BluetoothHandler();
+    while (!ble.isCharacteristicConnected()) {
+      await Future.delayed(const Duration(seconds: 1));
     }
-  }
-
-  Future<void> connectToBleDevice(BluetoothDevice device) async {
-    print("Connecting to ${device.remoteId}");
-    await device.connect();
-    List<BluetoothService> services = await device.discoverServices();
-    print(services.length);
-    services.forEach((service) {
-      if (service.uuid == targetService) {
-        sendToService(service);
-      }
-    });
-    await Future.delayed(Duration(seconds: 1));
-    await disconnectBleDevice(device);
-  }
-
-  Future<void> disconnectBleDevice(BluetoothDevice device) async {
-    await device.disconnect();
-  }
-
-  Future<void> sendToService(BluetoothService service) async {
-    List<BluetoothCharacteristic> characteristics = service.characteristics;
-    characteristics.forEach((characteristic) {
-      if (characteristic.uuid.toString() ==
-          "2a05") {
-        print("Found characteristic");
-        print(characteristic.uuid);
-        characteristic.write("Hello World!".codeUnits);
-      }
-    });
+    await ble.sendToDevice(message);
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
-import 'package:cube_scanner/screens/cube_processor.dart';
+import 'package:cube_scanner/screens/logic/bluetooth_handler.dart';
+import 'package:cube_scanner/screens/logic/cube_processor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cuber/cuber.dart' as cuber;
@@ -70,13 +71,19 @@ class _RubiksCubeState extends State<RubiksCube> {
             buildCubeFace(45, 54, true),
           ],
         ),
-        Text(
+        GestureDetector(
+          onTap: () =>{
+            BluetoothHandler().sendToDevice(cubeSolution()),
+          },
+          child: Text(
             '\n\n${cubeSolution()}',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
-        )
+          ),
+        ),
+
       ],
     );
   }
