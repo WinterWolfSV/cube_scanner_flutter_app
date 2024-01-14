@@ -38,21 +38,21 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: const Text('Start cube scan'),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-
-              ElevatedButton(
-                onPressed: () => context.goNamed('/cube_confirmation', pathParameters: {'id1': "hrdhfh"}),
-                child: const Text('Cube verification'),
-              ),
-              ElevatedButton(
-                onPressed: () => context.go('/testing'),
-                child: const Text('Start cube scan'),
-              ),
-            ],
-          )),
+      // bottomNavigationBar: BottomAppBar(
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.center,
+      //       children: [
+      //
+      //         ElevatedButton(
+      //           onPressed: () => context.goNamed('/cube_confirmation', pathParameters: {'id1': "hrdhfh"}),
+      //           child: const Text('Cube verification'),
+      //         ),
+      //         ElevatedButton(
+      //           onPressed: () => context.go('/testing'),
+      //           child: const Text('Start cube scan'),
+      //         ),
+      //       ],
+      //     )),
 
     );
   }
